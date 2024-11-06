@@ -78,6 +78,10 @@ body {
   margin-bottom: 1em;
 }
 
+.now-playing__release {
+  margin-bottom: 1em;
+}
+
 .now-playing__status {
   margin-bottom: 1em;
 }

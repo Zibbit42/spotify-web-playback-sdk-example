@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+import guesswhat from './P1070208.png'
 
 const track = {
     name: "",
@@ -12,12 +14,31 @@ const track = {
     ]
 }
 
+
+
 function WebPlayback(props) {
 
     const [is_paused, setPaused] = useState(false);
     const [is_active, setActive] = useState(false);
     const [player, setPlayer] = useState(undefined);
     const [current_track, setTrack] = useState(track);
+    const [guessing, setGuess] = useState(true);
+    const [token, setToken] = useState("");
+    const [track_data, setTdata] = useState([])
+
+    const getTrackData = async () => {
+        try {
+            const {data} = await axios.get("https://api.spotify.com/v1/me/player/currently-playing", {
+                headers: {
+                    Authorization: `Bearer ${props.token}`
+                }
+            })
+            setTdata(data.item)
+        } catch (error) {
+            console.log(error);
+        }
+    }
+
 
     useEffect(() => {
 
@@ -32,7 +53,7 @@ function WebPlayback(props) {
             const player = new window.Spotify.Player({
                 name: 'Web Playback SDK',
                 getOAuthToken: cb => { cb(props.token); },
-                volume: 0.5
+                volume: 0.2
             });
 
             setPlayer(player);
@@ -53,6 +74,7 @@ function WebPlayback(props) {
 
                 setTrack(state.track_window.current_track);
                 setPaused(state.paused);
+                getTrackData();
 
                 player.getCurrentState().then( state => { 
                     (!state)? setActive(false) : setActive(true) 
@@ -63,6 +85,7 @@ function WebPlayback(props) {
             player.connect();
 
         };
+
     }, []);
 
     if (!is_active) { 
@@ -75,34 +98,55 @@ function WebPlayback(props) {
                 </div>
             </>)
     } else {
-        return (
-            <>
-                <div className="container">
-                    <div className="main-wrapper">
+        if (guessing) {
+            return (
+                <>
+                    <div className="container">
+                        <div className="main-wrapper">
 
-                        <img src={current_track.album.images[0].url} className="now-playing__cover" alt="" />
+                        <img src={guesswhat} className="now-playing__cover" alt="" />
 
-                        <div className="now-playing__side">
-                            <div className="now-playing__name">{current_track.name}</div>
-                            <div className="now-playing__artist">{current_track.artists[0].name}</div>
+                            <div className="now-playing__side">    
+                                <button className="btn-spotify" onClick={() => { player.togglePlay() }} >
+                                    { is_paused ? "PLAY" : "PAUSE" }
+                                </button>
 
-                            <button className="btn-spotify" onClick={() => { player.previousTrack() }} >
-                                &lt;&lt;
-                            </button>
+                                <button className="btn-spotify" onClick={() => { setGuess(false) }} >
+                                    { "Auflösen" }
+                                </button>
 
-                            <button className="btn-spotify" onClick={() => { player.togglePlay() }} >
-                                { is_paused ? "PLAY" : "PAUSE" }
-                            </button>
-
-                            <button className="btn-spotify" onClick={() => { player.nextTrack() }} >
-                                &gt;&gt;
-                            </button>
+                            </div>
                         </div>
                     </div>
-                </div>
-            </>
-        );
+                </>
+            );
+        } else {
+            return (
+                <>
+                    <div className="container">
+                        <div className="main-wrapper">
+    
+                            <img src={current_track.album.images[0].url} className="now-playing__cover" alt="" />
+    
+                            <div className="now-playing__side">
+                                <div className="now-playing__name">{current_track.name}</div>
+                                <div className="now-playing__artist">{current_track.artists[0].name}</div>
+                                <div className="now-playing__release">{track_data.album.release_date}</div>
+    
+                                <button className="btn-spotify" onClick={() => { 
+                                    player.nextTrack();
+                                    setGuess(true) }} >
+                                { "Next" }
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </>
+            );
+        }  
     }
 }
+
+
 
 export default WebPlayback

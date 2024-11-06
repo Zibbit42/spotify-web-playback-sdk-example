@@ -8,8 +8,8 @@ global.access_token = ''
 
 dotenv.config()
 
-var spotify_client_id = process.env.SPOTIFY_CLIENT_ID
-var spotify_client_secret = process.env.SPOTIFY_CLIENT_SECRET
+var spotify_client_id = '57f520ff5c7843d295762f55d5ba5da9'/*process.env.SPOTIFY_CLIENT_ID*/
+var spotify_client_secret = '1775ddc0174c41aab42c24a1358d4028'/*process.env.SPOTIFY_CLIENT_SECRET*/
 
 var spotify_redirect_uri = 'http://localhost:3000/auth/callback'
 
@@ -27,7 +27,7 @@ var app = express();
 
 app.get('/auth/login', (req, res) => {
 
-  var scope = "streaming user-read-email user-read-private"
+  var scope = "streaming user-read-email user-read-private user-modify-playback-state user-read-currently-playing user-read-playback-state"
   var state = generateRandomString(16);
 
   var auth_query_parameters = new URLSearchParams({
@@ -75,3 +75,4 @@ app.get('/auth/token', (req, res) => {
 app.listen(port, () => {
   console.log(`Listening at http://localhost:${port}`)
 })
+
